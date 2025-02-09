@@ -1,0 +1,8 @@
+# Ignore any folders beginning with images_
+images_*/
+
+# Ignore the .env file
+.env
+
+# Ignore the norterra_env directory
+norterra_env/

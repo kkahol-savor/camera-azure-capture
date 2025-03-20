@@ -6,3 +6,5 @@ images_*/
 
 # Ignore the norterra_env directory
 norterra_env/
+
+__pycache__/

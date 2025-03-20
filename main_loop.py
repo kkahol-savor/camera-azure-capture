@@ -41,6 +41,7 @@ def upload_images_periodically(blob_handler, directories, interval=UPLOAD_INTERV
                     timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
                     blob_name = f"{directory}/{timestamp}_{filename}"
                     blob_handler.upload_file(file_path, blob_name)
+                    print(f"Uploaded {file_path} to {blob_name}")
         
         last_upload_time = current_time
         time.sleep(interval)
@@ -52,6 +53,7 @@ def clear_local_images_periodically(directories, interval_hours):
             blob_handler.delete_local_files(directory)
 
 def show_combined_video(camera1, camera2, camera3):
+    c=1
     if SHOW_CAPTURE:
         cv2.namedWindow('Combined Camera View', cv2.WINDOW_NORMAL)
     while camera1.camera.IsGrabbing() and camera2.camera.IsGrabbing() and camera3.camera.IsGrabbing():
@@ -68,7 +70,8 @@ def show_combined_video(camera1, camera2, camera3):
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
             else:
-                print("Captured frames from all cameras")
+                print(f"Captured frames from all cameras iteration no: {c}")
+                c=c+1
     if SHOW_CAPTURE:
         cv2.destroyAllWindows()
 
@@ -88,7 +91,11 @@ if __name__ == "__main__":
     blob_handler = BlobHandler()
 
     # Directories to monitor
-    directories = ["images_camera_0", "images_camera_1", "images_camera_2"]
+    base_dir=os.getenv('OUTPUT_DIRECTORY')
+    dir1=base_dir+'/images_camera_0'
+    dir2=base_dir+'/images_camera_1'
+    dir3=base_dir+'/images_camera_2'
+    directories = [dir1, dir2, dir3]
 
     # Create a thread to upload images to Azure Blob Storage every minute
     upload_thread = threading.Thread(target=upload_images_periodically, args=(blob_handler, directories, UPLOAD_INTERVAL_SECONDS))

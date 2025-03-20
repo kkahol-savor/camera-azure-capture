@@ -1,10 +1,13 @@
 from pypylon import pylon
 import os
 import cv2
+from dotenv import load_dotenv
 import threading
 
+load_dotenv()
+
 class CameraConnector:
-    def __init__(self, camera_index=0, width=1024, height=768):
+    def __init__(self, camera_index=0, width=2048, height=1536):
         self.camera_index = camera_index
         self.width = width
         self.height = height
@@ -12,7 +15,9 @@ class CameraConnector:
         self.converter.OutputPixelFormat = pylon.PixelType_RGB8packed
         self.converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
         self.frame_number = 0
-        self.output_dir = f"images_camera_{camera_index}"
+        base_dir=os.getenv("OUTPUT_DIRECTORY")
+        self.output_dir = base_dir+f"images_camera_{camera_index}"
+        print(f"Output directory: {self.output_dir}")
         os.makedirs(self.output_dir, exist_ok=True)
         self._configure_camera()
 
@@ -21,8 +26,15 @@ class CameraConnector:
         tl_factory = pylon.TlFactory.GetInstance()
         devices = tl_factory.EnumerateDevices()
         
+        print(f"Nukkk")  
+        for i, device in enumerate(devices):
+            print(f"Device {i}: {device.GetFriendlyName()} (Serial: {device.GetSerialNumber()})")
+        
         if len(devices) == 0:
             raise pylon.RuntimeException("No camera present.")
+        
+        if self.camera_index >= len(devices):
+            raise IndexError(f"Camera index {self.camera_index} is out of range. Only {len(devices)} devices found.")
         
         # Create an instant camera object with the specific device
         self.camera = pylon.InstantCamera(tl_factory.CreateDevice(devices[self.camera_index]))
